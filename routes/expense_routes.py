@@ -123,6 +123,36 @@ def update_expense(
     return expense
 
 
+@router.patch("/{expense_id}", response_model=schemas.ExpenseResponse)
+def patch_expense(
+    expense_id: int,
+    updated: schemas.ExpenseUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Partially updates one or more expense fields."""
+    expense = db.query(models.Expense).filter(
+        models.Expense.id == expense_id,
+        models.Expense.user_id == current_user.id
+    ).first()
+
+    if not expense:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expense not found")
+
+    if updated.title is not None:
+        expense.title = updated.title
+    if updated.amount is not None:
+        expense.amount = updated.amount
+    if updated.category is not None:
+        expense.category = updated.category
+    if updated.date is not None:
+        expense.date = updated.date
+
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
 @router.delete("/{expense_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_expense(
     expense_id: int,
