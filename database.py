@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from config import settings
 
-engine = create_engine(settings.DATABASE_URL, future=True)
+engine = create_engine(settings.DATABASE_URL, future=True, pool_pre_ping=True)
 
 # Each request gets its own isolated session
 SessionLocal = sessionmaker(

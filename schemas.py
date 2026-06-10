@@ -1,23 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, constr
 from typing import Optional
 from datetime import date
 from decimal import Decimal
 
 
+class BaseOrmModel(BaseModel):
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
 # --- USER SCHEMAS ---
 
 class UserCreate(BaseModel):
-    email: str
-    password: str
+    email: EmailStr
+    password: constr(min_length=8)
 
 
-class UserResponse(BaseModel):
+class UserResponse(BaseOrmModel):
     id: int
     email: str
     # Password intentionally excluded from all responses
-
-    class Config:
-        from_attributes = True
 
 
 # --- AUTH SCHEMAS ---
@@ -30,24 +33,28 @@ class Token(BaseModel):
 # --- EXPENSE SCHEMAS ---
 
 class ExpenseCreate(BaseModel):
-    title: str
+    title: constr(min_length=1)
     amount: Decimal
-    category: str
+    category: constr(min_length=1)
     date: date  # expects "YYYY-MM-DD" format
 
 
-class ExpenseResponse(BaseModel):
+class ExpenseUpdate(BaseModel):
+    title: Optional[constr(min_length=1)] = None
+    amount: Optional[Decimal] = None
+    category: Optional[constr(min_length=1)] = None
+    date: Optional[date] = None
+
+
+class ExpenseResponse(BaseOrmModel):
     id: int
     title: str
     amount: Decimal
     category: str
     date: date
 
-    class Config:
-        from_attributes = True
-
 
 # Summary schema for dashboard totals
-class CategorySummary(BaseModel):
+class CategorySummary(BaseOrmModel):
     category: str
     total: Decimal

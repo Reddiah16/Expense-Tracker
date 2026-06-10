@@ -97,7 +97,7 @@ def get_summary(
 @router.put("/{expense_id}", response_model=schemas.ExpenseResponse)
 def update_expense(
     expense_id: int,
-    updated: schemas.ExpenseCreate,
+    updated: schemas.ExpenseUpdate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -109,10 +109,15 @@ def update_expense(
     if not expense:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expense not found")
 
-    expense.title = updated.title
-    expense.amount = updated.amount
-    expense.category = updated.category
-    expense.date = updated.date
+    if updated.title is not None:
+        expense.title = updated.title
+    if updated.amount is not None:
+        expense.amount = updated.amount
+    if updated.category is not None:
+        expense.category = updated.category
+    if updated.date is not None:
+        expense.date = updated.date
+
     db.commit()
     db.refresh(expense)
     return expense
