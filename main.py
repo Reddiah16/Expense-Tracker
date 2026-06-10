@@ -6,7 +6,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from database import engine, Base
 from config import settings
 import models
-from routes import auth_routes, expense_routes
+from routes import auth_routes, category_routes, expense_routes
 
 app = FastAPI()
 
@@ -41,6 +41,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_routes.router)
+app.include_router(category_routes.router)
 app.include_router(expense_routes.router)
 
 

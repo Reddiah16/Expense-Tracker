@@ -15,6 +15,15 @@ class User(Base):
     expenses = relationship("Expense", back_populates="owner")
 
 
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
+
+    expenses = relationship("Expense", back_populates="category_obj")
+
+
 class Expense(Base):
     __tablename__ = "expenses"
 
@@ -26,6 +35,7 @@ class Expense(Base):
     amount = Column(Numeric(10, 2), nullable=False)
 
     category = Column(String, nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
     date = Column(Date, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -33,3 +43,4 @@ class Expense(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
 
     owner = relationship("User", back_populates="expenses")
+    category_obj = relationship("Category", back_populates="expenses")

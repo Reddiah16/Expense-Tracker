@@ -15,10 +15,20 @@ def create_expense(
     current_user: models.User = Depends(get_current_user)
 ):
     """Creates an expense owned by the current user."""
+    category_name = expense.category
+    category_id = expense.category_id
+
+    if category_id is not None:
+        category = db.query(models.Category).filter(models.Category.id == category_id).first()
+        if not category:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        category_name = category.name
+
     new_expense = models.Expense(
         title=expense.title,
         amount=expense.amount,
-        category=expense.category,
+        category=category_name,
+        category_id=category_id,
         date=expense.date,
         user_id=current_user.id
     )
@@ -131,8 +141,15 @@ def update_expense(
         expense.title = updated.title
     if updated.amount is not None:
         expense.amount = updated.amount
-    if updated.category is not None:
+    if updated.category_id is not None:
+        category = db.query(models.Category).filter(models.Category.id == updated.category_id).first()
+        if not category:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        expense.category_id = updated.category_id
+        expense.category = category.name
+    elif updated.category is not None:
         expense.category = updated.category
+        expense.category_id = None
     if updated.date is not None:
         expense.date = updated.date
 
@@ -161,8 +178,15 @@ def patch_expense(
         expense.title = updated.title
     if updated.amount is not None:
         expense.amount = updated.amount
-    if updated.category is not None:
+    if updated.category_id is not None:
+        category = db.query(models.Category).filter(models.Category.id == updated.category_id).first()
+        if not category:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+        expense.category_id = updated.category_id
+        expense.category = category.name
+    elif updated.category is not None:
         expense.category = updated.category
+        expense.category_id = None
     if updated.date is not None:
         expense.date = updated.date
 
