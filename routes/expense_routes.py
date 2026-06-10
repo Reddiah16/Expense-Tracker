@@ -61,6 +61,24 @@ def get_expenses(
     return query.order_by(models.Expense.date.desc()).all()
 
 
+@router.get("/{expense_id}", response_model=schemas.ExpenseResponse)
+def get_expense(
+    expense_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    """Returns a single expense owned by the current user."""
+    expense = db.query(models.Expense).filter(
+        models.Expense.id == expense_id,
+        models.Expense.user_id == current_user.id
+    ).first()
+
+    if not expense:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Expense not found")
+
+    return expense
+
+
 @router.get("/summary", response_model=list[schemas.CategorySummary])
 def get_summary(
     db: Session = Depends(get_db),
